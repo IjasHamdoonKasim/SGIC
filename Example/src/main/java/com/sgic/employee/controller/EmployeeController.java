@@ -4,12 +4,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sgic.employee.utill.Utills;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.sgic.employee.entities.Employee;
 import com.sgic.employee.service.EmployeeService;
+
+import javax.validation.Valid;
 
 @RestController
 public class EmployeeController {
@@ -17,9 +23,12 @@ public class EmployeeController {
 	EmployeeService employeeService;
 
 	@PostMapping("/addEmployee")
-	public ResponseEntity<Object> createIncomingSample(@RequestBody Employee employee) {
-		employeeService.saveEmployee(employee);
-		return ResponseEntity.ok("Saved Successfully!");
+	public ResponseEntity<Object> createIncomingSample(@Valid @NonNull @RequestBody Employee employee) {
+        if(Utills.notNullValidation(employee.getFirstName()) && Utills.notNullValidation(employee.getLastName())){
+            employeeService.saveEmployee(employee);
+            return ResponseEntity.ok("Saved Successfully!");
+        }
+        return ResponseEntity.ok("Not Saved Successfully!");
 	}
 
 	@GetMapping("/getAll")
@@ -34,7 +43,7 @@ public class EmployeeController {
 	}
 
 	@PutMapping("/updateEmployee/{id}")
-	public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employee){
+	public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @NonNull @RequestBody Employee employee){
 		Employee empl = employeeService.updateEmployee(id, employee);
 		return ResponseEntity.ok(empl);
 	}

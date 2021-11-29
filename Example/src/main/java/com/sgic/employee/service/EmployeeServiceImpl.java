@@ -1,26 +1,47 @@
 package com.sgic.employee.service;
 
+import com.sgic.employee.dto.EmployeeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.sgic.employee.entities.Employee;
 import com.sgic.employee.repositories.EmployeeRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
-@Autowired
-EmployeeRepository employeeRepository;
+
+	@Autowired
+	EmployeeRepository employeeRepository;
+
+	@Autowired
+	JavaMailSender javaMailSender;
 
 	@Override
 	public void saveEmployee(Employee employee) {
+		SimpleMailMessage smg = new SimpleMailMessage();
+		smg.setTo(employee.getEmail());
+		smg.setSubject("Aaa");
+		smg.setText("Bbb");
+
+		javaMailSender.send(smg);
 		employeeRepository.save(employee);
 	}
 
 	@Override
-	public List allEmployee(){
-		return employeeRepository.findAll();
+	public List<EmployeeDTO> allEmployee(){
+		return employeeRepository.findAll().stream().map(this::convertToEmployeeDto).collect(Collectors.toList());
+	}
+
+	public EmployeeDTO convertToEmployeeDto(Employee employee){
+		EmployeeDTO employeeDTO = new EmployeeDTO();
+		employeeDTO.setFirstName(employee.getFirstName());
+		employeeDTO.setLastName(employee.getLastName());
+		return employeeDTO;
 	}
 
 	@Override
